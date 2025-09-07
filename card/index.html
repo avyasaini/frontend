@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card</title>
+    <style>
+        * { 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            width: 300px;
+            background-color: rgb(238, 230, 230);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        }
+
+        .image-container {
+            position:relative;
+        }
+
+        .image-container img.product-img {
+            width: 100%;
+            border-radius: 6px;
+        }
+
+        .heart-icon {
+            position:absolute;
+            top: 10px;
+            right:15px;
+            width: 30px;
+            height: 35px;
+            background: white;
+            border-radius: 40%;
+            padding: 5px;
+            box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        }
+
+        .card h2 {
+            font-size: 25px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .price-cart {
+            display: flex;
+            align-items: center;
+            justify-content:space-evenly;
+            margin-top: 10px;
+        }
+
+        .price {
+            font-size: 30px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .card button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            background-color: #d27fc0;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            box-shadow: #333 0px 3px 8px;
+        }
+
+        .cart-icon {
+            width: 20px;
+            height: 20px; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+
+            <div class="image-container">
+                <img src="images/pink converse.png" class="product-img"/>
+                <img src="images/heart.png" class="heart-icon"/>
+            </div>
+
+            <h2>Converse Pink Sneakers</h2>
+            <p>Unleash bold style with these vibrant kicks. Elevate your look effortlessly</p>
+
+            <div class="price-cart">
+                <div class="price">$180</div>
+                <button id="addcart">
+                    <img src="images/add-to-cart.png" class="cart-icon"/>
+                    Add to cart
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
