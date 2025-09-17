@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(#7f9bb8, #d2dfea);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #c0cdd5;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            max-height: 600px;
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        .weather-info {
+            display: none;
+        }
+
+        .weather-info.show {
+            display: block;
+        }
+
+        .city-name {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .weather-icon {
+            font-size: 60px;
+            margin: 15px 0;
+        }
+
+        .temperature {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a1312;
+        }
+
+        .description {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #34495e;
+            text-transform: capitalize;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .loading {
+            display: none;
+            color: #2c3e50;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .error {
+            display: none;
+            background-color: #e4dcdb;
+            color: rgb(16, 14, 14);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .error.show {
+            display: block;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .details {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .temperature {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🌤️ Weather!</h1>
+        
+        <input type="text" class="search-box" placeholder="Enter city name..." id="cityinput" onkeypress="handleEnter(event)">
+        
+        <div class="loading" id="loading">
+            Getting weather data...
+        </div>
+        
+        <div class="error" id="error">
+            City not found. Please try another city.
+        </div>
+        
+        <div class="weather-info" id="weatherinfo">
+            <h2 class="city-name" id="cityname"></h2>
+            <div class="weather-icon" id="weathericon">☀️</div>
+            <div class="temperature" id="temperature"></div>
+            <div class="description" id="description"></div>
+            <div class="details">
+                <div class="detail-item">
+                    <div class="label">Feels Like</div>
+                    <div class="value" id="feelslike"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Humidity</div>
+                    <div class="value" id="humidity"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Wind Speed</div>
+                    <div class="value" id="windspeed"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Pressure</div>
+                    <div class="value" id="pressure"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'a5bf8ef40d19bbbfa377e2471c40069b';
+        const apiUrl = 'https://api.openweathermap.org/data/2.5/weather?units=metric&q=';
+
+        // Weather icons
+        const weatherIcons = {
+            '01d': '☀️', '01n': '🌙',
+            '02d': '⛅', '02n': '☁️',
+            '03d': '☁️', '03n': '☁️',
+            '04d': '☁️', '04n': '☁️',
+            '09d': '🌧️', '09n': '🌧️',
+            '10d': '🌦️', '10n': '🌧️',
+            '11d': '⛈️', '11n': '⛈️',
+            '13d': '❄️', '13n': '❄️',
+            '50d': '🌫️', '50n': '🌫️'
+        };
+
+        // DOM elements
+        const cityinput = document.getElementById('cityinput');
+        const weatherinfo = document.getElementById('weatherinfo');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                getweather();
+            }
+        }
+
+        async function getweather() {
+            const city = cityinput.value.trim();
+
+            if (!city) {
+                showError('Please enter a city name');
+                return;
+            }
+
+            showLoading();
+            hideError();
+            hideWeatherInfo();
+
+            try {
+                const response = await fetch(`${apiUrl}${city}&appid=${apiKey}`);
+                
+                if (!response.ok) {
+                    throw new Error('City not found');
+                }
+
+                const data = await response.json();
+                displayWeather(data);
+                
+            } catch (err) {
+                showError('City not found. Please try another city.');
+                console.error('Error:', err);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayWeather(data) {
+            document.getElementById('cityname').textContent = `${data.name}, ${data.sys.country}`;
+            document.getElementById('temperature').textContent = `${Math.round(data.main.temp)}°C`;
+            document.getElementById('description').textContent = data.weather[0].description;
+            document.getElementById('feelslike').textContent = `${Math.round(data.main.feels_like)}°C`;
+            document.getElementById('humidity').textContent = `${data.main.humidity}%`;
+            document.getElementById('windspeed').textContent = `${data.wind.speed} m/s`;
+            document.getElementById('pressure').textContent = `${data.main.pressure} hPa`;
+            
+            const iconCode = data.weather[0].icon;
+            document.getElementById('weathericon').textContent = weatherIcons[iconCode] || '🌤️';
+            
+            showWeatherInfo();
+        }
+
+        // Show/hide functions
+        function showLoading() {
+            loading.classList.add('show');
+        }
+
+        function hideLoading() {
+            loading.classList.remove('show');
+        }
+
+        function showError(message) {
+            document.getElementById('error').textContent = message;
+            error.classList.add('show');
+        }
+
+        function hideError() {
+            error.classList.remove('show');
+        }
+
+        function showWeatherInfo() {
+            weatherinfo.classList.add('show');
+        }
+
+        function hideWeatherInfo() {
+            weatherinfo.classList.remove('show');
+        }
+    </script>
+</body>
+</html>
